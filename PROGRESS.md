@@ -21,7 +21,9 @@
 - [x] 手機尺寸 UI 驗證:範例載入、揭曉、依隊伍、微調警告與復原、唯讀分享頁
 - [x] 以真實 Google 試算表驗證邏輯:24 人、1 個三人綁定組、1 條不同隊;2/3/4/6/8 隊各 1000 次全部合規(12 隊因每隊 2 人放不下三人組而正確報錯)。試算表為「知道連結的人可檢視」,App 自動轉 gviz CSV,跨網域讀取已確認允許。
 - [ ] 在瀏覽器介面中實際貼上試算表連結走一次完整流程
-- [ ] 部署到 GitHub Pages 並在實機手機測試「加到主畫面」
+- [x] 建立 GitHub Repository 並 Push 到 `main` 分支: [LinMark0320/team-splitter](https://github.com/LinMark0320/team-splitter)
+- [x] 啟用 GitHub Pages 靜態網站服務: [https://linmark0320.github.io/team-splitter/](https://linmark0320.github.io/team-splitter/)
+- [ ] 在實機手機瀏覽器開啟 GitHub Pages 測試「加到主畫面」與操作流程
 - [ ] 重新整理後保留結果的獨立驗證(邏輯已實作,尚未單獨驗證)
 
 ## 已修正的原有 bug
