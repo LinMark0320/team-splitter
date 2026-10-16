@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>分隊邏輯測試</title>
+<style>
+  body { font: 14px/1.6 system-ui, "Noto Sans TC", sans-serif; padding: 16px; background:#111; color:#eee; }
+  .pass { color: #6ee7a0 } .fail { color: #ff7b7b }
+  pre { white-space: pre-wrap; margin: 2px 0 8px 24px; color:#ffb4b4 }
+  #summary { font-size: 18px; font-weight: 700; margin-bottom: 12px }
+</style>
+</head>
+<body>
+<div id="summary" data-status="running">執行中…</div>
+<div id="out"></div>
+<script src="../logic.js"></script>
+<script>
+/* 在瀏覽器中模擬 node:test / node:assert,讓同一份測試檔可在無 Node 環境執行 */
+(function () {
+  const cases = [];
+  const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const assert = {
+    ok(v, msg) { if (!v) throw new Error(msg || 'assert.ok 失敗'); },
+    strictEqual(a, b, msg) { if (a !== b) throw new Error(msg || `strictEqual: ${JSON.stringify(a)} !== ${JSON.stringify(b)}`); },
+    deepStrictEqual(a, b, msg) { if (!eq(a, b)) throw new Error(msg || `deepStrictEqual: ${JSON.stringify(a)} != ${JSON.stringify(b)}`); },
+  };
+  const test = (name, fn) => cases.push({ name, fn });
+  window.require = (id) => {
+    if (id === 'node:test') return test;
+    if (id === 'node:assert') return assert;
+    if (id.endsWith('logic.js')) return window.TeamLogic;
+    throw new Error('未知模組 ' + id);
+  };
+  window.__runTests = function () {
+    const out = document.getElementById('out');
+    let pass = 0, fail = 0;
+    for (const c of cases) {
+      const d = document.createElement('div');
+      try { c.fn(); pass++; d.className = 'pass'; d.textContent = '✔ ' + c.name; out.appendChild(d); }
+      catch (e) {
+        fail++; d.className = 'fail'; d.textContent = '✘ ' + c.name; out.appendChild(d);
+        const p = document.createElement('pre'); p.textContent = e.message; out.appendChild(p);
+      }
+    }
+    const s = document.getElementById('summary');
+    s.textContent = `通過 ${pass} / 失敗 ${fail} / 共 ${cases.length}`;
+    s.dataset.status = fail ? 'fail' : 'pass';
+  };
+})();
+</script>
+<script src="logic.test.js"></script>
+<script>window.__runTests();</script>
+</body>
+</html>

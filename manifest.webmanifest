@@ -1,0 +1,16 @@
+{
+  "name": "分隊小幫手",
+  "short_name": "分隊",
+  "description": "從 Google 試算表讀取名單，依條件隨機分隊，點名字揭曉隊伍。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1224",
+  "theme_color": "#0f1224",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

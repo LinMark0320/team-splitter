@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>分隊小幫手｜點名字，揭曉你的隊伍</title>
+  <meta name="description" content="從 Google 試算表讀取名單，依「不同隊」與「綁定同隊」條件自動隨機分隊。點開名字就能看到所屬隊伍，手機即開即用。">
+  <meta name="theme-color" content="#0f1224">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">A<i>B</i></span>
+        <div>
+          <h1>分隊小幫手</h1>
+          <p class="meta" id="meta">尚未載入名單</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+      <label class="switch switch-gacha" id="gacha-wrap" title="點名字時播放扭蛋機動畫">
+        <input type="checkbox" id="gacha-toggle" role="switch" checked>
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+        <span class="switch-label">扭蛋</span>
+      </label>
+      <button class="icon-btn" id="btn-settings" aria-label="設定與載入名單" title="設定">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm8.2-3.5c0-.4 0-.8-.1-1.2l2-1.6-2-3.4-2.4 1a8 8 0 0 0-2-1.2L15.4 3h-4l-.4 2.6a8 8 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6c-.1.4-.1.8-.1 1.2s0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 2 1.2l.4 2.6h4l.4-2.6a8 8 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+      </div>
+    </header>
+
+    <div class="banner banner-share" id="banner-share" hidden>
+      唯讀分享結果 · 找到自己的名字，點開看隊伍
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="檢視方式">
+      <button role="tab" class="tab is-active" id="tab-list" aria-selected="true" data-view="list">名單</button>
+      <button role="tab" class="tab" id="tab-teams" aria-selected="false" data-view="teams">依隊伍</button>
+      <span class="tab-indicator" id="tab-indicator" aria-hidden="true"></span>
+    </nav>
+
+    <div class="team-picker" id="team-picker" role="group" aria-label="分幾隊" hidden></div>
+
+    <section class="toolbar" id="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="搜尋名字" autocomplete="off" aria-label="搜尋名字">
+      </label>
+      <button class="chip-btn" id="btn-toggle-all" type="button">全部展開</button>
+      <label class="switch" id="adjust-wrap">
+        <input type="checkbox" id="adjust-toggle" role="switch">
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+        <span class="switch-label">微調</span>
+      </label>
+    </section>
+
+    <div class="banner banner-adjust" id="banner-adjust" hidden></div>
+    <div class="violations" id="violations" hidden></div>
+
+    <main id="view" class="view" aria-live="polite"></main>
+
+    <div class="dock" id="dock">
+      <button class="dock-btn" id="btn-reroll" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        重新分隊
+      </button>
+      <button class="dock-btn" id="btn-copy" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V6a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        複製結果
+      </button>
+      <button class="dock-btn" id="btn-share" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        分享連結
+      </button>
+    </div>
+  </div>
+
+  <!-- 設定 / 載入名單 -->
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <form method="dialog" class="sheet-close-form"><button class="icon-btn" aria-label="關閉">✕</button></form>
+    <h2 id="sheet-title">載入名單</h2>
+    <p class="help">在 Google 試算表選「檔案 → 分享 → 發佈到網路」，選擇該分頁與 <b>CSV</b> 格式，把連結貼在下面。欄位：<code>姓名</code>｜<code>不同隊對象</code>｜<code>綁定對象</code>｜<code>性別</code>（選填，女生填「女」，男生留空）。多位對象用逗號或頓號分隔。</p>
+
+    <label class="field">
+      <span>試算表 CSV 連結</span>
+      <input id="in-url" type="url" inputmode="url" placeholder="https://docs.google.com/spreadsheets/d/e/…/pub?output=csv" autocomplete="off">
+    </label>
+    <label class="field field-narrow">
+      <span>要分成幾隊</span>
+      <input id="in-teams" type="number" inputmode="numeric" min="2" max="26" value="3">
+    </label>
+
+    <details class="paste">
+      <summary>改用貼上 CSV 內容</summary>
+      <textarea id="in-csv" rows="6" placeholder="姓名,不同隊對象,綁定對象&#10;小明,小華,&#10;小華,,小美"></textarea>
+    </details>
+
+    <ul class="errors" id="sheet-errors" hidden></ul>
+
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="btn-demo" type="button">使用範例資料</button>
+      <button class="btn btn-primary" id="btn-load" type="button">載入並分隊</button>
+    </div>
+  </dialog>
+
+  <!-- 扭蛋機:點名字後轉扭蛋揭曉隊伍 -->
+  <dialog class="gacha" id="gacha" aria-labelledby="gacha-name" data-stage="ready">
+    <div class="gacha-inner">
+      <form method="dialog" class="gacha-x"><button class="icon-btn" aria-label="關閉">✕</button></form>
+      <p class="gacha-kicker">扭蛋時間</p>
+      <h2 class="gacha-name" id="gacha-name"></h2>
+
+      <button class="machine" id="gacha-machine" type="button" aria-label="轉動扭蛋機">
+        <span class="dome"><span class="balls" id="gacha-balls"></span></span>
+        <span class="machine-body">
+          <span class="knob" aria-hidden="true"><span class="knob-bar"></span></span>
+          <span class="machine-label" aria-hidden="true">GACHA</span>
+          <span class="chute" aria-hidden="true"></span>
+        </span>
+      </button>
+
+      <div class="tray">
+        <div class="gacha-result" aria-live="polite">
+          <span class="sparks" aria-hidden="true" id="gacha-sparks"></span>
+          <span class="gacha-letter" id="gacha-letter"></span>
+          <strong class="gacha-team" id="gacha-team"></strong>
+        </div>
+        <button class="capsule" id="gacha-capsule" type="button" aria-label="打開扭蛋">
+          <span class="cap-top"></span><span class="cap-bottom"></span>
+        </button>
+      </div>
+
+      <p class="gacha-hint" id="gacha-hint"></p>
+      <form method="dialog" class="gacha-done"><button class="btn btn-primary" id="gacha-close">好，收起來</button></form>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
