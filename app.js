@@ -460,9 +460,32 @@
     render({ animate: true });
   }
 
+  // 防呆:不是為了保密,只是避免手滑把已經公布的結果洗掉
+  const REROLL_WORD = 'MARK';
+  const rerollMatches = () => $('reroll-input').value.trim().toUpperCase() === REROLL_WORD;
+
+  /** 開啟確認視窗;輸入正確的確認字才會真的重新分隊 */
   function reroll() {
     if (!state.model) return;
-    if (!confirm('重新分隊會取代目前的結果（包含微調），確定嗎？')) return;
+    $('reroll-input').value = '';
+    $('reroll-confirm').disabled = true;
+    $('reroll-dialog').showModal();
+    $('reroll-input').focus();
+  }
+
+  function initRerollGuard() {
+    $('reroll-input').addEventListener('input', () => { $('reroll-confirm').disabled = !rerollMatches(); });
+    $('reroll-cancel').addEventListener('click', () => $('reroll-dialog').close());
+    $('reroll-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!rerollMatches()) return;   // 按 Enter 也要擋
+      $('reroll-dialog').close();
+      doReroll();
+    });
+  }
+
+  function doReroll() {
+    if (!state.model) return;
     const r = doGenerate(state.model, state.teams);
     if (!r.ok) { toast(r.errors[0], 'error'); return; }
     state.assignment = r.assignment;
@@ -514,6 +537,7 @@
 
   function init() {
     buildGacha();
+    initRerollGuard();
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setView(t.dataset.view)));
     $('btn-settings').addEventListener('click', openSheet);
     $('btn-load').addEventListener('click', loadAndSplit);

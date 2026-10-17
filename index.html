@@ -112,6 +112,23 @@
     </div>
   </dialog>
 
+  <!-- 重新分隊防呆:要輸入確認字才能執行 -->
+  <dialog class="sheet" id="reroll-dialog" aria-labelledby="reroll-title">
+    <form method="dialog" class="sheet-close-form"><button class="icon-btn" aria-label="關閉">✕</button></form>
+    <h2 id="reroll-title">重新分隊</h2>
+    <p class="help">目前的結果（包含微調）會被取代，而且無法復原。要繼續的話，請輸入 <code>MARK</code>。</p>
+    <form id="reroll-form" autocomplete="off">
+      <label class="field">
+        <span>確認字</span>
+        <input id="reroll-input" type="text" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="輸入 MARK">
+      </label>
+      <div class="sheet-actions">
+        <button class="btn btn-ghost" id="reroll-cancel" type="button">取消</button>
+        <button class="btn btn-primary" id="reroll-confirm" type="submit" disabled>重新分隊</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- 扭蛋機:點名字後轉扭蛋揭曉隊伍 -->
   <dialog class="gacha" id="gacha" aria-labelledby="gacha-name" data-stage="ready">
     <div class="gacha-inner">
