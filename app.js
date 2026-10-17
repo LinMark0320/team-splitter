@@ -7,7 +7,7 @@
 
   // 加密保存的試算表連結:在「連結」欄輸入代碼(不分大小寫)就會解開並載入,連結不會出現在畫面或原始碼。
   // PBKDF2-SHA256(600000 次) + AES-GCM;內容為 salt(16) | iv(12) | 密文。
-  const SHEET_VAULT = { iter: 600000, data: 'nkL357Xx3xAeWOZz35gdFKZAm8TaSZ7d288U/fMP6QWOGszeu9PCNHI8crVDnhiNMCU5J2KuSwS2/Cu8eUBOsApiNWDDEL2ONyPIb5hoKxTO19mllrHfYy4EYMm0uvZ0IfCbDoYtNDyDrnNJY/MZUspo+YIXSxtGh6kA/GdG7KHJZeHnLUKdSNL15pglUokn' };
+  const SHEET_VAULT = { iter: 600000, data: 'rYXtREassoW01yLmuyqVj7kXRWvOdMWxf8KehFDbc1Fb6s7VrMWUlLkMB5wFHO158iaWQMslJLfMZH4GyU+8iq9znCmjW+J/5JCrW7pk9hK6NxBZL014185zXHZ72cjPRMrUSidL/v0Q9nGf8g9Pg69aBo0uLwjZY7gas37JA7f0as/ZkjkE+Jv0R81usDLj' };
 
   /** 用代碼解開加密的連結;代碼錯誤回傳 null,環境不支援加密(非 https)丟出錯誤 */
   async function openVault(code) {
