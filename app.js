@@ -5,6 +5,24 @@
   const STORE_KEY = 'team-splitter-v1';
   const $ = (id) => document.getElementById(id);
 
+  // 加密保存的試算表連結:在「連結」欄輸入代碼(不分大小寫)就會解開並載入,連結不會出現在畫面或原始碼。
+  // PBKDF2-SHA256(600000 次) + AES-GCM;內容為 salt(16) | iv(12) | 密文。
+  const SHEET_VAULT = { iter: 600000, data: 'nkL357Xx3xAeWOZz35gdFKZAm8TaSZ7d288U/fMP6QWOGszeu9PCNHI8crVDnhiNMCU5J2KuSwS2/Cu8eUBOsApiNWDDEL2ONyPIb5hoKxTO19mllrHfYy4EYMm0uvZ0IfCbDoYtNDyDrnNJY/MZUspo+YIXSxtGh6kA/GdG7KHJZeHnLUKdSNL15pglUokn' };
+
+  /** 用代碼解開加密的連結;代碼錯誤回傳 null,環境不支援加密(非 https)丟出錯誤 */
+  async function openVault(code) {
+    if (!window.crypto || !crypto.subtle) throw new Error('這個連線無法解開代碼（需要 https 網址），請直接貼上試算表連結。');
+    try {
+      const raw = Uint8Array.from(atob(SHEET_VAULT.data), (c) => c.charCodeAt(0));
+      const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(code.trim().toUpperCase()), 'PBKDF2', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt: raw.slice(0, 16), iterations: SHEET_VAULT.iter, hash: 'SHA-256' },
+        base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: raw.slice(16, 28) }, key, raw.slice(28));
+      return new TextDecoder().decode(plain);
+    } catch (e) { return null; }
+  }
+
   const DEMO_CSV = [
     '姓名,不同隊對象,綁定對象',
     '小明,小華,',
@@ -395,11 +413,19 @@
     showSheetErrors([]);
     if (!pasted && !urlInput) { showSheetErrors(['請貼上試算表 CSV 連結，或展開「改用貼上 CSV 內容」']); return; }
     btn.disabled = true; btn.textContent = '載入中…';
+    let usedCode = false;
     try {
       let text = pasted;
       if (!text) {
+        let sheetUrl = urlInput;
+        if (!/^https?:\/\//i.test(urlInput)) {
+          // 不是網址就當成代碼;解開的連結只在記憶體中使用,不顯示也不存檔
+          sheetUrl = await openVault(urlInput);
+          if (!sheetUrl) throw new Error('這不是試算表連結，也不是正確的代碼。');
+          usedCode = true;
+        }
         let res;
-        try { res = await fetch(csvUrlFor(urlInput), { cache: 'no-store' }); }
+        try { res = await fetch(csvUrlFor(sheetUrl), { cache: 'no-store' }); }
         catch (e) { throw new Error('無法連線到試算表。請確認連結正確且已「發佈到網路」(CSV)，或改用貼上 CSV 內容。'); }
         if (!res.ok) throw new Error(`讀取試算表失敗(HTTP ${res.status})，請確認已發佈到網路。`);
         text = await res.text();
@@ -408,7 +434,7 @@
       const model = L.buildModel(L.parseCSV(text));
       const result = doGenerate(model, teams);
       if (!result.ok) { showSheetErrors(result.errors); return; }
-      applyResult(model, teams, result.assignment, urlInput);
+      applyResult(model, teams, result.assignment, usedCode ? '' : urlInput);
       $('sheet').close();
       toast(result.attempts > 1 ? `分隊完成（因條件衝突重試了 ${result.attempts} 次）` : '分隊完成');
     } catch (e) {
