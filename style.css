@@ -276,6 +276,9 @@ body.no-data .dock, body.no-data .toolbar, body.no-data .tabs { display: none; }
 .team-chip.is-current { background: var(--paper); color: var(--ink); border-color: transparent; }
 .team-chip.is-unavailable { opacity: 0.35; }
 body.is-share .team-picker { display: none !important; }
+/* 搜尋與「全部展開」只對名單頁有用 */
+body[data-view="teams"] .search, body[data-view="teams"] #btn-toggle-all { display: none; }
+body[data-view="teams"] .toolbar { justify-content: flex-end; }
 
 /* ---------- 扭蛋機 ---------- */
 .gacha {
@@ -424,6 +427,54 @@ body.is-share .team-picker { display: none !important; }
 .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
 .toast.is-warn { background: var(--warn); }
 .toast.is-error { background: var(--danger); color: #fff; }
+
+/* ---------- 手機:緊湊版面(名單兩欄、頂部壓縮),減少滾動 ---------- */
+@media (max-width: 559px) {
+  :root { --dock-h: 62px; }
+  .app { padding: calc(env(safe-area-inset-top) + 8px) 12px calc(var(--dock-h) + env(safe-area-inset-bottom) + 16px); }
+
+  .topbar { margin-bottom: 8px; }
+  .brand { gap: 10px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 10px; font-size: 20px; }
+  .brand-mark i { width: 18px; height: 18px; font-size: 11px; right: -5px; bottom: -5px; border-radius: 6px; }
+  h1 { font-size: 18px; }
+  .meta { margin-top: 1px; font-size: 11px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  .switch { height: 38px; gap: 6px; }
+  .switch-label { font-size: 13px; }
+  .topbar-actions { gap: 4px; }
+
+  .tabs { margin-bottom: 8px; padding: 3px; border-radius: 12px; }
+  .tab { padding: 7px 0; font-size: 15px; }
+  .tab-indicator { top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 9px; }
+  .team-picker { margin-bottom: 8px; gap: 5px; }
+  .team-picker-label { font-size: 13px; margin-right: 2px; }
+  .team-chip { height: 34px; min-width: 38px; padding: 0 10px; border-radius: 10px; font-size: 15px; }
+  .toolbar { gap: 8px; margin-bottom: 8px; }
+  .search { height: 38px; border-radius: 10px; padding: 0 10px; }
+  .chip-btn { height: 38px; padding: 0 10px; border-radius: 10px; font-size: 13px; }
+
+  /* 名單:兩欄。同一列的兩張卡自動等高,揭曉前後高度不變 */
+  .list { grid-template-columns: 1fr 1fr; gap: 8px; align-items: stretch; }
+  .person { border-radius: 12px; }
+  .person::before { left: 9px; top: 23px; width: 6px; height: 6px; margin-top: -3px; }
+  .person-head { min-height: 46px; padding: 8px 8px 8px 22px; gap: 6px; }
+  .person-name { font-size: 15px; line-height: 1.3; }
+  .person-chev { width: 18px; height: 18px; }
+  .badge { height: 24px; min-width: 26px; padding: 0 6px; border-radius: 8px; font-size: 14px; }
+  .badge-suffix { display: none; }
+
+  /* 依隊伍:兩欄 */
+  .teams { grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+  .team { border-radius: 12px; }
+  .team-head { flex-wrap: wrap; gap: 2px 8px; padding: 8px 10px; }
+  .team-letter { width: 30px; height: 30px; border-radius: 9px; font-size: 18px; }
+  .team-title { font-size: 15px; }
+  .team-count { flex-basis: 100%; margin-left: 0; font-size: 11px; }
+  .team-members { gap: 6px; padding: 8px 10px 10px; }
+  .member { padding: 5px 9px; border-radius: 8px; font-size: 14px; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }

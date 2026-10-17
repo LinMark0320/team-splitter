@@ -153,6 +153,7 @@
     $('meta').textContent = n ? `${n} 人 · ${state.teams} 隊${state.shared ? ' · 唯讀' : ''}` : '尚未載入名單';
 
     document.querySelector('.tabs').dataset.view = state.view;
+    document.body.dataset.view = state.view;
     document.querySelectorAll('.tab').forEach(t => {
       const on = t.dataset.view === state.view;
       t.classList.toggle('is-active', on);
@@ -249,7 +250,7 @@
           onclick: () => onPersonTap(i),
         },
           h('span', { class: 'person-name' }, name),
-          h('span', { class: 'badge' }, `${L.teamName(t)} 隊`),
+          h('span', { class: 'badge' }, L.teamName(t), h('span', { class: 'badge-suffix' }, ' 隊')),
           chevron()));
       list.append(card);
     });
